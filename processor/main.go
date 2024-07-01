@@ -69,6 +69,9 @@ func processFileAsync(rawFilename string) {
         return
     }
 
+    // TODO: it is writing to a single m3u8 file,
+    // we want to write to multiple m3u8 files. Each file
+    // should have a maximum of 10 ts files
 	cmd := exec.Command("ffmpeg",
 		"-i", inputFilePath,
         "-f", "hls",
