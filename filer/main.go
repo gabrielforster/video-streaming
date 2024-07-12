@@ -3,9 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -16,7 +14,6 @@ import (
 )
 
 const (
-	FILE_PATH   = "uploads"
 	BUCKET_NAME = "filer-videos"
 )
 
@@ -40,17 +37,11 @@ func main() {
 	sess := session.Must(session.NewSession(&cfg))
 	s3Client := s3.New(sess)
 
-	err := os.MkdirAll(FILE_PATH, 0755)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
 	http.HandleFunc("/upload", uploadHandler(s3Client))
 	http.HandleFunc("/signed", retrieveSignedURLHandler(s3Client))
 
 	fmt.Println("starting filer server")
-	err = http.ListenAndServe(*port, nil)
+    err := http.ListenAndServe(*port, nil)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -124,8 +115,7 @@ func uploadHandler(s3Client *s3.S3) http.HandlerFunc {
             return
         }
 
-
-		// TODO: move this a pub/sub (redis?)
+		// TODO: move this a queue
 		go func() {
 			postData := strings.NewReader(fmt.Sprintf(`{"filename": "%s"}`, filename))
 
